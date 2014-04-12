@@ -44,5 +44,6 @@ shinyUI(pageWithSidebar(
                      div(plotOutput(outputId = "plot_infy")))
     
     
+    
   )
 ))
