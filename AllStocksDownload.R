@@ -43,11 +43,15 @@ for (i in 1:nrstocks){
 }
 
 
-#Lets save the stock data to a data file
-tryCatch(
-{
-  save(stockData, file=savefilename)
-  cat("Sucessfully saved the stock data to %s",savefilename)
+#Lets save the stock data to mysql.
+#Connection to mysql.
+con <- dbConnect(MySQL(),user="root", password="root", dbname="stockdata", host="localhost")
+for (tick in nrstocks) {
+  print(tick)
+  df <- get(stocksLst[tick,1], pos=stockData)  # get data from stockData environment
+  df1=setNames(df,c("Open","High","Low","Close","Volume","Adjusted"))
+  #dbwriteTable(con, name="stocknew",value=as.data.frame(df), field.types=list(dte="date", open="double(20,10)",high="double(20,10)",low="double(20,10)",Close="double(20,10)",volume="double(20,10)",Adjusted="double(20,10)"),row.names=FALSE,append=TRUE)
+  print(head(df1))
+  dbWriteTable(con, name='stocksnew', value=as.data.frame(df1),append=TRUE,row.names=FALSE)  
+ 
 }
-, error = function(e) print(e))
-
