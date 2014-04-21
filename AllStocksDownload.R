@@ -1,22 +1,16 @@
 library(TTR)
 library(quantmod)
 library(RMySQL)
-# Download all stocks for NASDAQ
-
+# Download all stock symbols for NASDAQ
 cat("Fetching all tickers\n")
 
 all.symbols <- stockSymbols(c("NASDAQ"),sort.by=c("MarketCap","Symbol"),quiet=TRUE)
-# Get 10 biggest by market cap
 
+# Get 10 symbols from the list.
 biggest.symbols <- tail(all.symbols,n=10)
 
-# Cleanup
-
+# Taking columns Symbol Name and LastSale
 clean.symbols <- subset(biggest.symbols, select = c("Symbol","Name","LastSale"))
-#head(all.symbols)
-#head(clean.symbols)
-#clean.symbols
-row.names(clean.symbols) <- NULL
 
 # Download data
 
@@ -29,33 +23,28 @@ for (i in 1:nrow(clean.symbols)){
   try (getSymbols(symbol, verbose=FALSE, warnings=FALSE, from='2005-01-01'))
   
   if(!exists(symbol)){
-    # print(symbol)
     cat(", error - did not download (likely due to rate limiting\n")
-    #    clean.symbols <- clean.symbols$symbol <- NULL
-    # print(clean.symbols)
-    #print(clean.symbols$symbol)
   }
   else {
     cat("\n")
   }
-#  Sys.sleep(2)
 }
+
 # Save data to MySQL
-
-
-
-  con <- dbConnect(MySQL(),user="root", password="root", dbname="stock", host="localhost")
-
-
+#MySQL connection with user and password as root. dbname is stockdata.
+con <- dbConnect(MySQL(),user="root", password="root", dbname="stockdata", host="localhost")
 
 # Loop through each symbol
 
 for (i in 1:nrow(clean.symbols)){
   symbol <- clean.symbols[i,]$Symbol
-  df = data.frame(symbol,Date=index(get(symbol)), coredata(get(symbol),""))
-  df1=setNames(df,c("symbol","Date","Open","High","Low","Close","Volume","Adjusted"))
+  #dfAllStocks is a dataframe containing symbol, date, and the stock data.
+  #coredata function is to strip off date and index and take only the data
+  dfAllStocks = data.frame(symbol,Date=index(get(symbol)), coredata(get(symbol),""))
+  #declare the column names, first is symbol assigns corresponding symbols.
+  dfColumnNames=setNames(dfAllStocks,c("symbol","Date","Open","High","Low","Close","Volume","Adjusted"))
   cat("Storing",symbol,"\n")
-  
-  dbWriteTable(con, name='allstocks', value=as.data.frame(df1), row.names=FALSE,append=TRUE)
-  
+  #storing all stock data to database.
+  dbWriteTable(con, name='allstocks', value=as.data.frame(dfColumnNames), row.names=FALSE,append=TRUE)
 }
+cat("Stocks with symbols download and saved in MySQL")
