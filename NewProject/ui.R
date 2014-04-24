@@ -22,10 +22,16 @@ shinyUI(pageWithSidebar(
   
   wellPanel(
     p(strong("Date range (back from present)")),
+
+    dateRangeInput("daterange", "Date Range",
+               start = "2014-01-01", 
+               end = as.character(Sys.Date())),
+
     sliderInput(inputId = "time_num",
                 label = "Time Number",
                 min = 1, max = 24, step = 1, value = 6),
-    
+
+    br(),
     selectInput(inputId = "time_unit",
                 label = "Time Unit",
                 choices = c("Day" = "day",

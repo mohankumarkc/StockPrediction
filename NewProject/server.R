@@ -24,7 +24,10 @@ output$plotSymbol <- renderPlot({
   #print(showSelectedSymbol)
 
   #Query to retrieve the data for the selected stock symbol from the dropdown. 
-  query1 <- reactive({paste("SELECT Date, Open, High, Low, Close, Volume FROM allstocks WHERE symbol='",input$StockSymbols,"';",sep="")})
+  cat("date between",input$daterange[1],"and",input$daterange[2])
+  print(as.character(input$daterange[1]))
+  query1 <- reactive({paste("SELECT Date, Open, High, Low, Close, Volume FROM allstocks WHERE symbol='",input$StockSymbols,"' AND Date between '",input$daterange[1],"' AND '",input$daterange[2],"';",sep="")})
+  traceback()
   result2 <- reactive({dbGetQuery(con,query1())})
   print(head(result2()))
   PDS <- xts(result2()[,-1],order.by=as.POSIXct(result2()[,1]))
