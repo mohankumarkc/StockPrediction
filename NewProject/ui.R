@@ -38,7 +38,7 @@ shinyUI(pageWithSidebar(
                             "Weeks" = "weeks",
                             "Months" = "months",
                             "Years" = "years"),
-                selected = "day")
+                selected = "Day")
   )),
   
   # Main panel (on the right hand side)

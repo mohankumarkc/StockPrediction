@@ -26,18 +26,22 @@ output$plotSymbol <- renderPlot({
   #Query to retrieve the data for the selected stock symbol from the dropdown. 
   cat("date between",input$daterange[1],"and",input$daterange[2])
   print(as.character(input$daterange[1]))
-  query1 <- reactive({paste("SELECT Date, Open, High, Low, Close, Volume FROM allstocks WHERE symbol='",input$StockSymbols,"' AND Date between '",input$daterange[1],"' AND '",input$daterange[2],"';",sep="")})
+  print(as.character(input$daterange[2]))
+  query1 <- reactive({paste("SELECT Date, Open, High, Low, Close, Volume FROM allstocks WHERE symbol='",input$StockSymbols,"' AND Date between '",as.character(input$daterange[1]),"' AND '",as.character(input$daterange[2]),"';",sep="")})
   traceback()
   result2 <- reactive({dbGetQuery(con,query1())})
   print(head(result2()))
-  PDS <- xts(result2()[,-1],order.by=as.POSIXct(result2()[,1]))
-  print(head(PDS))
+  finalValues <- xts(result2()[,-1],order.by=as.POSIXct(result2()[,1]))
+  print(head(finalValues))
 
-
-  chartSeries(PDS, name=input$StockSymbols, theme = "white", 
+  # addVo()     - add volume 
+  # addBBands() - add Bollinger Bands 
+  # addCCI()    - add Commodity Channel Index
+  # "last" in subset is to show latest data. other option is "first".
+  chartSeries(finalValues, name=input$StockSymbols, theme = "white", 
               type = input$chart_type, 
-              subset    = paste("last", input$time_num, input$time_unit),              
-              log.scale = FALSE
+              subset    = paste("last", input$time_num, input$time_unit),
+              log.scale = FALSE,TA="addVo();addBBands();" 
               )
 })
 
